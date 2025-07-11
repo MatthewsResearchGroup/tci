@@ -5,7 +5,7 @@ lib_libtci_la_SOURCES = tci/barrier.c \
 						tci/parallel.c \
 						tci/slot.c \
 						tci/work_item.c
-						
+
 if CPLUSPLUS
 lib_libtci_la_SOURCES += tci/communicator_cpp.cxx \
 						 tci/task_set_cpp.cxx
@@ -27,6 +27,8 @@ nobase_include_HEADERS = tci.h \
                          tci/task_set.h \
                          tci/work_item.h \
                          tci/yield.h
+
+pkgconfig_DATA = tci.pc
 
 %_cpp.cxx: %.c
 	@cp $< $@
