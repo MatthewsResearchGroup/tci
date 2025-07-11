@@ -31,7 +31,7 @@ openmp, pthreads, tbb, omptask, winthreads, ppl, or dispatch [default=auto]")
 
 set(ENABLE_THREADING auto CACHE STRING "synonym for ENABLE_THREAD_MODEL")
 
-if(ENABLE_THREAD_MODEL STREQUAL auto AND NOT ENABLE_THREADING STREQUAL auto
+if(ENABLE_THREAD_MODEL STREQUAL auto AND NOT ENABLE_THREADING STREQUAL auto)
     set(ENABLE_THREAD_MODEL ${ENABLE_THREADING})
 endif()
 
