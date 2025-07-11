@@ -10,8 +10,6 @@ project(TCI
     LANGUAGES C CXX
 )
 
-set(CMAKE_CXX_STANDARD 20)
-
 include(CheckIncludefile)
 include(CheckSymbolExists)
 include(CheckCSourceCompiles)
@@ -28,17 +26,13 @@ pthread_spinlock, osx_spinlock, os_unfair_lock, omp_lock, atomic_spinlock [defau
 set(ENABLE_BARRIER auto CACHE STRING "use a barrier of the specified type, one of auto, pthread_barrier, \
 spin_barrier [default=auto]")
 
-set(ENABLE_THREAD_MODEL "" CACHE STRING "enable threading with the specified model, one of none, auto, task, \
+set(ENABLE_THREAD_MODEL auto CACHE STRING "enable threading with the specified model, one of none, auto, task, \
 openmp, pthreads, tbb, omptask, winthreads, ppl, or dispatch [default=auto]")
 
-set(ENABLE_THREADING "" CACHE STRING "synonym for ENABLE_THREAD_MODEL")
+set(ENABLE_THREADING auto CACHE STRING "synonym for ENABLE_THREAD_MODEL")
 
-if(ENABLE_THREAD_MODEL STREQUAL "")
-    if(NOT ENABLE_THREADING STREQUAL "")
-        set(ENABLE_THREAD_MODEL ${ENABLE_THREADING})
-    else()
-        set(ENABLE_THREAD_MODEL auto)
-    endif()
+if(ENABLE_THREAD_MODEL STREQUAL auto AND NOT ENABLE_THREADING STREQUAL auto
+    set(ENABLE_THREAD_MODEL ${ENABLE_THREADING})
 endif()
 
 # Default to disabled for all mutex/barrier/thread options
@@ -375,14 +369,20 @@ endif()
 #
 
 add_library(tci SHARED
-tci/barrier.c
-tci/communicator.c
-tci/task_set.c
-tci/context.c
-tci/mutex.c
-tci/parallel.c
-tci/slot.c
-tci/work_item.c
+    tci/barrier.c
+    tci/communicator.c
+    tci/task_set.c
+    tci/context.c
+    tci/mutex.c
+    tci/parallel.c
+    tci/slot.c
+    tci/work_item.c
+)
+
+set_target_properties(tci PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
 )
 
 target_link_libraries(tci PUBLIC ${EXTRA_LIBS})
