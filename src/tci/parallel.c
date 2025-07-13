@@ -1,10 +1,12 @@
-#include "parallel.h"
+#include "tci/parallel.h"
 
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
 
 #if TCI_USE_OPENMP_THREADS
+
+#include <omp.h>
 
 int tci_parallelize(tci_thread_func func, void* payload,
                     unsigned nthread, unsigned arity)
@@ -57,6 +59,8 @@ int tci_parallelize(tci_thread_func func, void* payload,
 }
 
 #elif TCI_USE_PTHREADS_THREADS
+
+#include <pthread.h>
 
 typedef struct
 {
@@ -123,7 +127,8 @@ int tci_parallelize(tci_thread_func func, void* payload,
 
 #elif TCI_USE_WINDOWS_THREADS
 
-//TODO
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 typedef struct
 {

@@ -1,8 +1,8 @@
-#include "pipeline.h"
+#include "tci/pipeline.h"
 
 void tci_pipeline_init(tci_pipeline** p, unsigned depth, size_t size, void* buffer)
 {
-    *p = malloc(sizeof(tci_pipeline) + sizeof(int)*(depth-1));
+    *p = (tci_pipeline*)malloc(sizeof(tci_pipeline) + sizeof(int)*(depth-1));
 
     (*p)->buffer = buffer;
     (*p)->size = size;
@@ -12,7 +12,7 @@ void tci_pipeline_init(tci_pipeline** p, unsigned depth, size_t size, void* buff
 
     for (unsigned i = 0;i < depth;i++)
     {
-        (*p)->status[i] = TCI_NOT_FILLED;
+        (*p)->state[i] = TCI_NOT_FILLED;
     }
 }
 

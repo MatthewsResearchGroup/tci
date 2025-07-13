@@ -20,6 +20,10 @@ include(GNUInstallDirs)
 # Set up options
 #
 
+option(ENABLE_SHARED "build a shared library" ON)
+
+option(ENABLE_STATIC "build a static library" OFF)
+
 set(ENABLE_MUTEX auto CACHE STRING "use a mutex of the specified type, one of auto, pthread_mutex, \
 pthread_spinlock, osx_spinlock, os_unfair_lock, omp_lock, atomic_spinlock [default=auto]")
 
@@ -336,24 +340,31 @@ endif()
 #
 
 if(HAVE_ATOMIC_LIB)
-    list(APPEND EXTRA_LIBS atomic)
+    list(APPEND PRIVATE_LIBS atomic)
+    list(APPEND PKGCONFIG_LIBS -latomic)
 endif()
 
 if(USE_PTHREADS_THREADS OR USE_PTHREAD_MUTEX OR USE_PTHREAD_BARRIER OR USE_PTHREAD_SPINLOCK)
-    list(APPEND EXTRA_LIBS Threads::Threads)
+    list(APPEND PUBLIC_LIBS Threads::Threads)
+    # This is probably not always correct
+    list(APPEND PKGCONFIG_LIBS -lpthread)
 endif()
 
 if(USE_OPENMP_THREADS OR USE_OMP_LOCK)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    list(APPEND EXTRA_LIBS OpenMP::OpenMP_C)
+    add_compile_options("${OpenMP_C_FLAGS}")
+    add_link_options("${OpenMP_C_FLAGS}")
+    list(APPEND PRIVATE_LIBS OpenMP::OpenMP_C)
+    list(APPEND PKGCONFIG_LIBS "${OpenMP_C_FLAGS}")
 endif()
 
 if(USE_DISPATCH_THREADS AND HAVE_DISPATCH_LIB)
-    list(APPEND EXTRA_LIBS dispatch)
+    list(APPEND PRIVATE_LIBS dispatch)
+    list(APPEND PKGCONFIG_LIBS -ldispatch)
 endif()
 
 if(USE_TBB_THREADS)
-    list(APPEND EXTRA_LIBS TBB::tbb)
+    list(APPEND PRIVATE_LIBS TBB::tbb)
+    list(APPEND PKGCONFIG_REQUIRES tbb)
 endif()
 
 if(USE_WINDOWS_THREADS)
@@ -364,78 +375,100 @@ if(USE_PPL_THREADS)
     # no additional libraries required
 endif()
 
-#
-# Configure TCI
-#
-
-add_library(tci SHARED
-    tci/barrier.c
-    tci/communicator.c
-    tci/task_set.c
-    tci/context.c
-    tci/mutex.c
-    tci/parallel.c
-    tci/slot.c
-    tci/work_item.c
-)
-
-set_target_properties(tci PROPERTIES
-    CXX_STANDARD 20
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS OFF
-)
-
-target_link_libraries(tci PUBLIC ${EXTRA_LIBS})
-
-set_target_properties(tci PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
-
-configure_file(tci/tci_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/tci/tci_config.h @ONLY)
-configure_file(tci.pc.in ${CMAKE_CURRENT_BINARY_DIR}/tci.pc @ONLY)
-
 # Have to compile communicator and task_set with C++ if using TBB or PPL
 if(USE_PPL_THREADS OR USE_TBB_THREADS)
     set(TCI_CXX ON)
 endif()
 
+#
+# Configure TCI
+#
+
+configure_file(include/tci/tci_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/tci/tci_config.h @ONLY)
+configure_file(tci.pc.in ${CMAKE_CURRENT_BINARY_DIR}/tci.pc @ONLY)
+
+set(TCI_SOURCES
+    src/tci/barrier.c
+    src/tci/communicator.c
+    src/tci/task_set.c
+    src/tci/context.c
+    src/tci/mutex.c
+    src/tci/parallel.c
+    src/tci/slot.c
+    src/tci/work_item.c
+)
+
+set(TCI_HEADERS
+    include/tci/barrier.h
+    include/tci/communicator.h
+    include/tci/context.h
+    include/tci/mutex.h
+    include/tci/parallel.h
+    include/tci/pipeline.h
+    include/tci/slot.h
+    include/tci/task_set.h
+    include/tci/work_item.h
+    include/tci/yield.h
+    include/tci.h
+    include/tci/barrier.hpp
+    include/tci/communicator.hpp
+    include/tci/context.hpp
+    include/tci/mutex.hpp
+    include/tci/parallel.hpp
+    include/tci/slot.hpp
+    include/tci/work_item.hpp
+    include/tci.hpp
+)
+
 if(TCI_CXX)
-    set_source_files_properties(tci/communicator.c PROPERTIES LANGUAGE CXX)
-    set_source_files_properties(tci/task_set.c PROPERTIES LANGUAGE CXX)
+    list(APPEND TCI_SOURCES
+        src/tci/communicator.cpp
+        src/tci/task_set.cpp
+    )
 endif()
 
-target_include_directories(tci PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tci>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/tci>
+add_library(tci-objects OBJECT ${TCI_SOURCES})
+set_property(TARGET tci-objects PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+target_include_directories(tci-objects PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_sources(tci
-    INTERFACE FILE_SET public_headers TYPE HEADERS
-    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-    FILES
-    tci/barrier.h
-    tci/communicator.h
-    tci/context.h
-    tci/mutex.h
-    tci/parallel.h
-    tci/pipeline.h
-    tci/slot.h
-    tci/task_set.h
-    tci/tci_global.h
-    tci/work_item.h
-    tci/yield.h
-    tci.h
+if(TCI_CXX)
+    set_target_properties(tci-objects PROPERTIES
+        CXX_STANDARD 20
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+    )
+endif()
+
+if (ENABLE_SHARED)
+    add_library(tci SHARED $<TARGET_OBJECTS:tci-objects>)
+    target_link_libraries(tci PUBLIC ${PUBLIC_LIBS} PRIVATE ${PRIVATE_LIBS})
+    set_target_properties(tci PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
+    list(APPEND TCI_TARGETS tci)
+endif()
+
+if (ENABLE_STATIC)
+    add_library(tci-static STATIC $<TARGET_OBJECTS:tci-objects>)
+    target_link_libraries(tci-static PUBLIC ${PUBLIC_LIBS} PRIVATE ${PRIVATE_LIBS})
+    set_target_properties(tci-static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
+    set_target_properties(tci-static PROPERTIES OUTPUT_NAME tci)
+    list(APPEND TCI_TARGETS tci-static)
+endif()
+
+list(GET TCI_TARGETS 0 TCI_MAIN_TARGET)
+
+target_sources(${TCI_MAIN_TARGET}
+    INTERFACE FILE_SET headers TYPE HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include
+    FILES ${TCI_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/include/tci/tci_config.h
 )
 
-target_sources(tci
-    INTERFACE FILE_SET config_headers TYPE HEADERS
-    BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
-    FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/tci/tci_config.h
-)
-
-install(TARGETS tci EXPORT tci-targets
-    FILE_SET public_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    FILE_SET config_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(TARGETS ${TCI_TARGETS} EXPORT tci-targets
+    FILE_SET headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 install(EXPORT tci-targets

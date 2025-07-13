@@ -16,7 +16,7 @@ endif
 
 nobase_include_HEADERS = tci.h \
 						 tci/tci_config.h \
-                         tci/tci_global.h \
+                         tci/tci_config.h \
                          tci/barrier.h \
                          tci/communicator.h \
                          tci/context.h \

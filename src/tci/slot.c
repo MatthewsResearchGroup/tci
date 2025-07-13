@@ -1,4 +1,5 @@
-#include "slot.h"
+#include "tci/slot.h"
+#include "tci/yield.h"
 
 int tci_slot_init(tci_slot* slot, int empty)
 {

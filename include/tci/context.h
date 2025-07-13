@@ -1,9 +1,8 @@
 #ifndef _TCI_CONTEXT_H_
 #define _TCI_CONTEXT_H_
 
-#include "tci_global.h"
-
-#include "barrier.h"
+#include "tci/tci_config.h"
+#include "tci/barrier.h"
 
 #ifdef __cplusplus
 extern "C" {
