@@ -1,4 +1,5 @@
-#include "work_item.h"
+#include "tci/work_item.h"
+#include "tci/yield.h"
 
 #include <stdlib.h>
 

@@ -1,10 +1,10 @@
 #ifndef _TCI_TASK_SET_H_
 #define _TCI_TASK_SET_H_
 
-#include "tci_global.h"
+#include "tci/tci_config.h"
 
-#include "parallel.h"
-#include "slot.h"
+#include "tci/parallel.h"
+#include "tci/slot.h"
 
 #ifdef __cplusplus
 extern "C" {

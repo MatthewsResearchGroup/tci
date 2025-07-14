@@ -1,6 +1,10 @@
 #ifndef _TCI_CONFIG_H_
 #define _TCI_CONFIG_H_
 
+#define TCI_VERSION_MAJOR        @TCI_VERSION_MAJOR@
+#define TCI_VERSION_MINOR        @TCI_VERSION_MINOR@
+#define TCI_VERSION              "@TCI_VERSION@"
+
 #define TCI_USE_ATOMIC_SPINLOCK  @USE_ATOMIC_SPINLOCK@
 #define TCI_USE_OMP_LOCK         @USE_OMP_LOCK@
 #define TCI_USE_OPENMP_THREADS   @USE_OPENMP_THREADS@
@@ -15,5 +19,30 @@
 #define TCI_USE_PTHREAD_MUTEX    @USE_PTHREAD_MUTEX@
 #define TCI_USE_PTHREAD_SPINLOCK @USE_PTHREAD_SPINLOCK@
 #define TCI_USE_SPIN_BARRIER     @USE_SPIN_BARRIER@
+
+#if TCI_USE_OPENMP_THREADS || TCI_USE_PTHREADS_THREADS || TCI_USE_WINDOWS_THREADS
+#define TCI_IS_TASK_BASED 0
+#define TCI_IS_THREAD_BASED 1
+#elif TCI_USE_TBB_THREADS || TCI_USE_OMPTASK_THREADS || TCI_USE_DISPATCH_THREADS || TCI_USE_PPL_THREADS
+#define TCI_IS_TASK_BASED 1
+#define TCI_IS_THREAD_BASED 0
+#else
+#define TCI_IS_TASK_BASED 0
+#define TCI_IS_THREAD_BASED 0
+#endif
+
+#define TCI_MIN(x,y) ((y)<(x)?(y):(x))
+#define TCI_MAX(x,y) ((x)<(y)?(y):(x))
+
+#include <stdint.h>
+#include <errno.h>
+#include <stdlib.h>
+
+#ifdef __cplusplus
+#define TCI_INLINE inline
+#else
+#define TCI_INLINE static inline
+#include <stdbool.h>
+#endif
 
 #endif

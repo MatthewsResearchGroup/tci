@@ -1,8 +1,11 @@
-#include "mutex.h"
+#include "tci/mutex.h"
+#include "tci/yield.h"
 
 #include <string.h>
 
 #if TCI_USE_OS_UNFAIR_LOCK
+
+#include <os/lock.h>
 
 int tci_mutex_init(tci_mutex* mutex)
 {
@@ -43,6 +46,8 @@ int tci_mutex_unlock(tci_mutex* mutex)
 
 #elif TCI_USE_OSX_SPINLOCK
 
+#include <libkern/OSAtomic.h>
+
 int tci_mutex_init(tci_mutex* mutex)
 {
     static OSSpinLock init = OS_SPINLOCK_INIT;
@@ -82,6 +87,8 @@ int tci_mutex_unlock(tci_mutex* mutex)
 
 #elif TCI_USE_PTHREAD_SPINLOCK
 
+#include <pthread.h>
+
 int tci_mutex_init(tci_mutex* mutex)
 {
     return pthread_spin_init(mutex, PTHREAD_PROCESS_PRIVATE);
@@ -109,6 +116,8 @@ int tci_mutex_unlock(tci_mutex* mutex)
 
 #elif TCI_USE_PTHREAD_MUTEX
 
+#include <pthread.h>
+
 int tci_mutex_init(tci_mutex* mutex)
 {
     return pthread_mutex_init(mutex, NULL);
@@ -135,6 +144,8 @@ int tci_mutex_unlock(tci_mutex* mutex)
 }
 
 #elif TCI_USE_OMP_LOCK
+
+#include <omp.h>
 
 int tci_mutex_init(tci_mutex* mutex)
 {

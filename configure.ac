@@ -1,4 +1,4 @@
-AC_INIT([tci],[1.0],[damatthews@smu.edu],[tblis],[http://www.github.com/devinamatthews/tci])
+AC_INIT([tci],[1.0],[damatthews@smu.edu],[TCI],[http://www.github.com/devinamatthews/tci])
 AM_INIT_AUTOMAKE([foreign silent-rules subdir-objects])
 AM_SILENT_RULES([yes])
 AM_MAINTAINER_MODE([disable])
@@ -8,6 +8,16 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC([icc gcc clang])
 AC_PROG_CXX([icpc g++ clang++])
 LT_INIT
+
+TCI_VERSION=$PACKAGE_VERSION
+TCI_VERSION_MAJOR=$(echo $TCI_VERSION | cut -d. -f1)
+TCI_VERSION_MINOR=$(echo $TCI_VERSION | cut -d. -f2)
+
+AC_SUBST([TCI_VERSION])
+AC_SUBST([TCI_VERSION_MAJOR])
+AC_SUBST([TCI_VERSION_MINOR])
+
+PKG_INSTALLDIR
 
 #
 # Get user preferences
@@ -30,7 +40,7 @@ AC_ARG_ENABLE([thread-model], AS_HELP_STRING([--enable-thread-model@<:@=model@:>
 
 AC_ARG_ENABLE([threading], AS_HELP_STRING([--enable-threading=@<:@=model@:>@],
     [alias for --enable-thread-model]), [thread_model=$enable_threading], [])
-    
+
 if test x"$thread_model" = xno; then
     thread_model=none
 fi
@@ -42,32 +52,32 @@ fi
 AX_PTHREAD([have_pthreads=yes], [have_pthreads=no])
 
 have_pthread_mutex=no
-have_pthread_spin=no
+have_pthread_spinlock=no
 have_pthread_barrier=no
-        
+
 if test x$have_pthreads = xyes; then
     LIBS_save="$LIBS"
     CFLAGS_save="$CFLAGS"
     LIBS="$LIBS $PTHREAD_LIBS"
     CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-    
+
     AC_CHECK_FUNCS([pthread_spin_init pthread_mutex_init pthread_barrier_init])
-    
+
     if test x"$ac_cv_header_pthread_h" = xyes -a \
             x"$ac_cv_func_pthread_mutex_init" = xyes; then
         have_pthread_mutex=yes
     fi
-    
+
     if test x"$ac_cv_header_pthread_h" = xyes -a \
             x"$ac_cv_func_pthread_spin_init" = xyes; then
-        have_pthread_spin=yes
+        have_pthread_spinlock=yes
     fi
-    
+
     if test x"$ac_cv_header_pthread_h" = xyes -a \
             x"$ac_cv_func_pthread_barrier_init" = xyes; then
         have_pthread_barrier=yes
     fi
-    
+
     LIBS="$LIBS_save"
     CFLAGS="$CFLAGS_save"
 fi
@@ -272,8 +282,8 @@ USE_OS_UNFAIR_LOCK=0
 USE_OSX_SPINLOCK=0
 USE_OMP_LOCK=0
 USE_ATOMIC_SPINLOCK=0
-   
-AC_MSG_CHECKING([mutex type]) 
+
+AC_MSG_CHECKING([mutex type])
 if test x"$mutex_type" = xpthread_mutex; then
     if test x"$have_pthread_mutex" = xno; then
         AC_MSG_ERROR([pthread mutex requested but not available])
@@ -323,8 +333,8 @@ fi
 
 USE_PTHREAD_BARRIER=0
 USE_SPIN_BARRIER=0
-    
-AC_MSG_CHECKING([barrier type]) 
+
+AC_MSG_CHECKING([barrier type])
 if test x"$barrier_type" = xpthread_barrier; then
     if test x"$have_pthread_barrier" = xno; then
         AC_MSG_ERROR([pthread barrier requested but not available])
@@ -382,7 +392,7 @@ USE_WINDOWS_THREADS=0
 USE_PPL_THREADS=0
 USE_OMPTASK_THREADS=0
 
-AC_MSG_CHECKING([thread model]) 
+AC_MSG_CHECKING([thread model])
 if test x"$thread_model" = xopenmp; then
     if test x"$have_openmp" = xno; then
         AC_MSG_ERROR([openmp requested but not available])
@@ -434,7 +444,7 @@ elif test x"$thread_model" = xppl; then
 elif test x"$thread_model" != xnone; then
     AC_MSG_ERROR([Invalid threading model specified.])
 fi
-AC_MSG_RESULT([$thread_model]) 
+AC_MSG_RESULT([$thread_model])
 
 AC_SUBST([USE_OPENMP_THREADS])
 AC_SUBST([USE_OMPTASK_THREADS])
@@ -449,8 +459,8 @@ AM_CONDITIONAL([CPLUSPLUS], [test x$USE_TBB_THREADS = x1 || \
 
 if test x$USE_TBB_THREADS = x1 || \
    test x$USE_PPL_THREADS = x1; then
-    AX_CXX_COMPILE_STDCXX([17], [noext])
+    AX_CXX_COMPILE_STDCXX([20], [noext])
 fi
 
-AC_CONFIG_FILES([Makefile tci/tci_config.h])
+AC_CONFIG_FILES([Makefile tci/tci_config.h tci.pc])
 AC_OUTPUT

@@ -1,9 +1,12 @@
-#include "barrier.h"
+#include "tci/barrier.h"
+#include "tci/yield.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #if TCI_USE_PTHREAD_BARRIER
+
+#include <pthread.h>
 
 int tci_barrier_node_init(tci_barrier_node* barrier,
                           tci_barrier_node* parent,

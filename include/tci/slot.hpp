@@ -1,31 +1,7 @@
-#ifndef _TCI_SLOT_H_
-#define _TCI_SLOT_H_
+#ifndef _TCI_SLOT_HPP_
+#define _TCI_SLOT_HPP_
 
-#include "tci_global.h"
-
-#include "yield.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef volatile int tci_slot;
-
-int tci_slot_init(tci_slot* slot, int empty);
-
-int tci_slot_is_filled(tci_slot* slot, int empty);
-
-int tci_slot_try_fill(tci_slot* slot, int empty, int value);
-
-void tci_slot_fill(tci_slot* slot, int empty, int value);
-
-void tci_slot_clear(tci_slot* slot, int empty);
-
-#ifdef __cplusplus
-}
-#endif
-
-#if defined(__cplusplus) && !defined(TCI_DONT_USE_CXX11)
+#include "tci/slot.h"
 
 namespace tci
 {
@@ -69,7 +45,5 @@ class slot
 };
 
 }
-
-#endif
 
 #endif

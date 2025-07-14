@@ -8,6 +8,5 @@
 #include "tci/parallel.h"
 #include "tci/slot.h"
 #include "tci/work_item.h"
-#include "tci/yield.h"
 
 #endif

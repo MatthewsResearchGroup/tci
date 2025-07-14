@@ -1,92 +1,7 @@
-#ifndef _TCI_COMMUNICATOR_H_
-#define _TCI_COMMUNICATOR_H_
+#ifndef _TCI_COMMUNICATOR_HPP_
+#define _TCI_COMMUNICATOR_HPP_
 
-#include "tci_global.h"
-
-#include "context.h"
-
-typedef struct tci_comm
-{
-    tci_context* context;
-    unsigned ngang;
-    unsigned gid;
-    unsigned nthread;
-    unsigned tid;
-} tci_comm;
-
-enum
-{
-    TCI_EVENLY         = (1<<1),
-    TCI_CYCLIC         = (2<<1),
-    TCI_BLOCK_CYCLIC   = (3<<1),
-    TCI_BLOCKED        = (4<<1),
-    TCI_NO_CONTEXT     =    0x1
-};
-
-typedef struct tci_range
-{
-    uint64_t size;
-    uint64_t grain;
-
-#ifdef __cplusplus
-    tci_range() : size(0), grain(1) {}
-
-    template <typename T>
-    tci_range(const T& size) : size(size), grain(1) {}
-
-    template <typename T, typename U>
-    tci_range(const T& size, const U& grain) : size(size), grain(grain) {}
-#endif
-} tci_range;
-
-typedef void (*tci_range_func)(tci_comm*, uint64_t, uint64_t, void*);
-
-typedef void (*tci_range_2d_func)(tci_comm*, uint64_t, uint64_t,
-                                  uint64_t, uint64_t, void*);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern tci_comm* const tci_single;
-
-int tci_comm_init_single(tci_comm* comm);
-
-int tci_comm_init(tci_comm* comm, tci_context* context,
-                  unsigned nthread, unsigned tid, unsigned ngang, unsigned gid);
-
-int tci_comm_destroy(tci_comm* comm);
-
-int tci_comm_is_master(const tci_comm* comm);
-
-int tci_comm_barrier(tci_comm* comm);
-
-int tci_comm_bcast(tci_comm* comm, void** object, unsigned root);
-
-int tci_comm_bcast_nowait(tci_comm* comm, void** object, unsigned root);
-
-int tci_comm_gang(tci_comm* parent, tci_comm* child,
-                  int type, unsigned n, unsigned bs);
-
-void tci_comm_distribute_over_gangs(tci_comm* comm, tci_range range,
-                                    tci_range_func func, void* payload);
-
-void tci_comm_distribute_over_threads(tci_comm* comm, tci_range range,
-                                      tci_range_func func, void* payload);
-
-void tci_comm_distribute_over_gangs_2d(tci_comm* comm, tci_range range_m,
-                                       tci_range range_n,
-                                       tci_range_2d_func func, void* payload);
-
-void tci_comm_distribute_over_threads_2d(tci_comm* comm, tci_range range_m,
-                                         tci_range range_n,
-                                         tci_range_2d_func func, void* payload);
-
-#ifdef __cplusplus
-}
-#endif
-
-#if defined(__cplusplus) && !defined(TCI_DONT_USE_CXX11)
+#include "tci/communicator.h"
 
 #include <system_error>
 #include <tuple>
@@ -99,63 +14,10 @@ namespace tci
     class communicator;
 }
 
-#include "task_set.h"
+#include "tci/task_set.h"
 
 namespace tci
 {
-
-namespace detail
-{
-
-#if __cplusplus >= 201402l
-
-using std::index_sequence;
-using std::index_sequence_for;
-
-#else
-
-template <size_t... S>
-struct index_sequence
-{
-    typedef size_t value_type;
-    static constexpr size_t size() noexcept { return sizeof...(S); }
-};
-
-template <typename, typename> struct concat_sequences;
-
-template <size_t... S, size_t... R>
-struct concat_sequences<index_sequence<S...>, index_sequence<R...>>
-{
-    typedef index_sequence<S..., (R+sizeof...(S))...> type;
-};
-
-template <size_t N, typename=void> struct make_index_sequence_helper;
-
-template <size_t N> struct make_index_sequence_helper<N, typename std::enable_if<N==0>::type>
-{
-    typedef index_sequence<> type;
-};
-
-template <size_t N> struct make_index_sequence_helper<N, typename std::enable_if<N==1>::type>
-{
-    typedef index_sequence<0> type;
-};
-
-template <size_t N> struct make_index_sequence_helper<N, typename std::enable_if<(N>1)>::type>
-{
-    typedef typename concat_sequences<typename make_index_sequence_helper<(N+1)/2>::type,
-                                      typename make_index_sequence_helper<N/2>::type>::type type;
-};
-
-template <size_t N>
-using make_index_sequence = typename make_index_sequence_helper<N>::type;
-
-template <typename... T>
-using index_sequence_for = make_index_sequence<sizeof...(T)>;
-
-#endif
-
-}
 
 class communicator
 {
@@ -500,7 +362,5 @@ class communicator
 };
 
 }
-
-#endif
 
 #endif
