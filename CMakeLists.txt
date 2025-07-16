@@ -1,20 +1,26 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(TCI_VERSION_MAJOR 1)
-set(TCI_VERSION_MINOR 0)
-set(TCI_VERSION "${TCI_VERSION_MAJOR}.${TCI_VERSION_MINOR}")
+file(STRINGS version TCI_VERSION_RAW)
+set(TCI_VERSION "${TCI_VERSION_RAW}")
+string(REPLACE "." ";" TCI_VERSION_RAW ${TCI_VERSION_RAW})
+list(GET TCI_VERSION_RAW 0 TCI_VERSION_MAJOR)
+list(GET TCI_VERSION_RAW 1 TCI_VERSION_MINOR)
 set(prefix ${CMAKE_INSTALL_PREFIX})
 
 project(TCI
     VERSION "${TCI_VERSION}"
     LANGUAGES C CXX
+    HOMEPAGE_URL "http://www.github.com/MatthewsResearchGroup/tci"
+    DESCRIPTION "Thread Control Interface"
 )
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(ConfigureWrapper)
 include(CheckIncludefile)
 include(CheckSymbolExists)
 include(CheckCSourceCompiles)
 include(CMakePackageConfigHelpers)
-include(GNUInstallDirs)
 
 #
 # Set up options
