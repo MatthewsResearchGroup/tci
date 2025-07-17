@@ -17,7 +17,7 @@ project(TCI
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(ConfigureWrapper)
-include(CheckIncludefile)
+include(CheckIncludeFile)
 include(CheckSymbolExists)
 include(CheckCSourceCompiles)
 include(CMakePackageConfigHelpers)
