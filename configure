@@ -1811,7 +1811,7 @@ fi
 
 test -z $CC || ax_cv_cmake_flags="$ax_cv_cmake_flags -DCMAKE_C_COMPILER=$CC"
 test -z $CXX || ax_cv_cmake_flags="$ax_cv_cmake_flags -DCMAKE_CXX_COMPILER=$CXX"
-cmake \
+ cmake \
 	-DCMAKE_INSTALL_PREFIX=$prefix \
 	-DINSTALL_PREFIX=$prefix \
 	-DINSTALL_EXEC_PREFIX=$exec_prefix \
@@ -1835,5 +1835,6 @@ cmake \
 	-DINSTALL_PDFDIR=$pdfdir \
 	-DINSTALL_PSDIR=$psdir \
 	$ax_cv_cmake_flags \
+	 \
     $srcdir
 

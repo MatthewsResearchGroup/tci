@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.23)
 
 file(STRINGS version TCI_VERSION_RAW)
 set(TCI_VERSION "${TCI_VERSION_RAW}")
 string(REPLACE "." ";" TCI_VERSION_RAW ${TCI_VERSION_RAW})
 list(GET TCI_VERSION_RAW 0 TCI_VERSION_MAJOR)
 list(GET TCI_VERSION_RAW 1 TCI_VERSION_MINOR)
-set(prefix ${CMAKE_INSTALL_PREFIX})
+set(prefix ${INSTALL_PREFIX})
 
 project(TCI
     VERSION "${TCI_VERSION}"
@@ -17,7 +17,7 @@ project(TCI
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(ConfigureWrapper)
-include(CheckIncludefile)
+include(CheckIncludeFile)
 include(CheckSymbolExists)
 include(CheckCSourceCompiles)
 include(CMakePackageConfigHelpers)
@@ -66,6 +66,19 @@ set(USE_WINDOWS_THREADS 0)
 #
 # Check for various libraries
 #
+
+#
+# Check if we need -lm
+#
+check_symbol_exists(sqrt math.h HAVE_SQRT)
+if(NOT HAVE_SQRT)
+    check_library_exists(m sqrt "" HAVE_SQRT)
+    if (NOT HAVE_SQRT)
+        message(FATAL_ERROR "no math library found.")
+    else()
+        list(APPEND PRIVATE_LIBS -lm)
+    endif()
+endif()
 
 # Detect pthread support
 find_package(Threads)
@@ -439,7 +452,7 @@ set_property(TARGET tci-objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 target_include_directories(tci-objects PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
 )
 
 if(TCI_CXX)
@@ -474,13 +487,13 @@ target_sources(${TCI_MAIN_TARGET}
 )
 
 install(TARGETS ${TCI_TARGETS} EXPORT tci-targets
-    FILE_SET headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILE_SET headers DESTINATION ${INSTALL_INCLUDEDIR}
 )
 
 install(EXPORT tci-targets
     FILE TCITargets.cmake
     NAMESPACE TCI::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/TCI)
+    DESTINATION ${INSTALL_LIBDIR}/cmake/TCI)
 
 write_basic_package_version_file(
     "TCIConfigVersion.cmake"
@@ -488,6 +501,6 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion)
 
 install(FILES "TCIConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/TCIConfigVersion.cmake"
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/TCI)
+    DESTINATION ${INSTALL_LIBDIR}/cmake/TCI)
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tci.pc" DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tci.pc" DESTINATION ${INSTALL_LIBDIR}/pkgconfig)
