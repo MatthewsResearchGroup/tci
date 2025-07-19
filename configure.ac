@@ -1,5 +1,5 @@
 AC_INIT(TCI,
-    m4_normalize(m4_include([version])),
+    m4_normalize(m4_include([tci-version])),
     damatthews@smu.edu,
     tci,
     http://www.github.com/MatthewsResearchGroup/tci)

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-file(STRINGS version TCI_VERSION_RAW)
+file(STRINGS tci-version TCI_VERSION_RAW)
 set(TCI_VERSION "${TCI_VERSION_RAW}")
 string(REPLACE "." ";" TCI_VERSION_RAW ${TCI_VERSION_RAW})
 list(GET TCI_VERSION_RAW 0 TCI_VERSION_MAJOR)
@@ -449,10 +449,8 @@ endif()
 add_library(tci-objects OBJECT ${TCI_SOURCES})
 set_property(TARGET tci-objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-target_include_directories(tci-objects PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+target_include_directories(tci-objects PRIVATE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
 )
 
 if(TCI_CXX)
@@ -468,6 +466,12 @@ if (ENABLE_SHARED)
     target_link_libraries(tci PUBLIC ${PUBLIC_LIBS} PRIVATE ${PRIVATE_LIBS})
     set_target_properties(tci PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
     list(APPEND TCI_TARGETS tci)
+    target_include_directories(tci PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
+    )
 endif()
 
 if (ENABLE_STATIC)
@@ -476,6 +480,12 @@ if (ENABLE_STATIC)
     set_target_properties(tci-static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
     set_target_properties(tci-static PROPERTIES OUTPUT_NAME tci)
     list(APPEND TCI_TARGETS tci-static)
+    target_include_directories(tci PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
+    )
 endif()
 
 list(GET TCI_TARGETS 0 TCI_MAIN_TARGET)
