@@ -71,9 +71,9 @@ set(USE_WINDOWS_THREADS 0)
 # Check if we need -lm
 #
 check_symbol_exists(sqrt math.h HAVE_SQRT)
+check_library_exists(m sqrt "" HAVE_LIBM)
 if(NOT HAVE_SQRT)
-    check_library_exists(m sqrt "" HAVE_SQRT)
-    if (NOT HAVE_SQRT)
+    if (NOT HAVE_LIBM)
         message(FATAL_ERROR "no math library found.")
     else()
         list(APPEND PRIVATE_LIBS -lm)
