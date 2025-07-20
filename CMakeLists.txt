@@ -450,6 +450,8 @@ add_library(tci-objects OBJECT ${TCI_SOURCES})
 set_property(TARGET tci-objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 target_include_directories(tci-objects PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
 )
 
@@ -480,7 +482,7 @@ if (ENABLE_STATIC)
     set_target_properties(tci-static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
     set_target_properties(tci-static PROPERTIES OUTPUT_NAME tci)
     list(APPEND TCI_TARGETS tci-static)
-    target_include_directories(tci PUBLIC
+    target_include_directories(tci-static PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
@@ -503,14 +505,17 @@ install(TARGETS ${TCI_TARGETS} EXPORT tci-targets
 install(EXPORT tci-targets
     FILE TCITargets.cmake
     NAMESPACE TCI::
-    DESTINATION ${INSTALL_LIBDIR}/cmake/TCI)
+    DESTINATION ${INSTALL_LIBDIR}/cmake/TCI
+)
 
 write_basic_package_version_file(
     "TCIConfigVersion.cmake"
     VERSION ${CMAKE_PACKAGE_VERSION}
-    COMPATIBILITY AnyNewerVersion)
+    COMPATIBILITY AnyNewerVersion
+)
 
 install(FILES "TCIConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/TCIConfigVersion.cmake"
-    DESTINATION ${INSTALL_LIBDIR}/cmake/TCI)
+    DESTINATION ${INSTALL_LIBDIR}/cmake/TCI
+)
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tci.pc" DESTINATION ${INSTALL_LIBDIR}/pkgconfig)
