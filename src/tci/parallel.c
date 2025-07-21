@@ -189,14 +189,22 @@ int tci_parallelize(tci_thread_func func, void* payload,
     return tci_comm_destroy(&comm0);
 }
 
-#else // TCI_USE_TBB_THREADS, TCI_USE_DISPATCH_THREADS,
-      // TCI_USE_PPL_THREADS, single threaded
+#elif TCI_IS_TASK_BASED
 
 int tci_parallelize(tci_thread_func func, void* payload,
                     unsigned nthread, unsigned arity)
 {
     tci_comm comm = {NULL, 1, 0, nthread, 0};
     func(&comm, payload);
+    return 0;
+}
+
+#else //single threaded
+
+int tci_parallelize(tci_thread_func func, void* payload,
+                    unsigned nthread, unsigned arity)
+{
+    func(tci_single, payload);
     return 0;
 }
 
