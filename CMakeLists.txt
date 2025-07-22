@@ -137,12 +137,33 @@ check_c_source_compiles("
         __atomic_is_lock_free(4, 0);
         return 0;
     }"
-    HAVE_GCC_ATOMIC_BUILTINS
+    TCI_HAVE_GCC_ATOMIC_BUILTINS
 )
-if(NOT HAVE_GCC_ATOMIC_BUILTINS)
-    message(FATAL_ERROR "__atomic builtins required")
-endif()
-
+set(CMAKE_REQUIRED_FLAGS -std=c11)
+check_c_source_compiles("
+    #include <stdatomic.h>
+    int main()
+    {
+        // Test C11 atomic functions
+        atomic_load_explicit((_Atomic int*)0, memory_order_seq_cst);
+        atomic_store_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
+        atomic_exchange_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
+        atomic_compare_exchange_strong_explicit((_Atomic int*)0, (int*)0, 0, memory_order_seq_cst, memory_order_seq_cst);
+        atomic_compare_exchange_weak_explicit((_Atomic int*)0, (int*)0, 0, memory_order_seq_cst, memory_order_seq_cst);
+        atomic_fetch_add_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
+        atomic_fetch_sub_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
+        atomic_fetch_and_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
+        atomic_fetch_or_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
+        atomic_fetch_xor_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
+        atomic_flag_test_and_set_explicit((atomic_flag*)0, memory_order_seq_cst);
+        atomic_flag_clear_explicit((atomic_flag*)0, memory_order_seq_cst);
+        atomic_thread_fence(memory_order_seq_cst);
+        atomic_signal_fence(memory_order_seq_cst);
+        atomic_is_lock_free((_Atomic int*)0);
+        return 0;
+    }"
+    TCI_HAVE_C11_ATOMIC
+)
 
 if(CMAKE_USE_PTHREADS_INIT)
     check_symbol_exists(pthread_mutex_init pthread.h HAVE_PTHREAD_MUTEX_INIT)
@@ -460,6 +481,14 @@ if(TCI_CXX)
         CXX_STANDARD 20
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
+    )
+endif()
+
+if(TCI_HAVE_C11_ATOMIC AND NOT TCI_HAVE_GCC_ATOMIC_BUILTINS)
+    set_target_properties(tci-objects PROPERTIES
+        C_STANDARD 11
+        C_STANDARD_REQUIRED ON
+        C_EXTENSIONS OFF
     )
 endif()
 

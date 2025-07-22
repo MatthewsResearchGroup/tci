@@ -11,8 +11,8 @@ extern "C" {
 typedef struct tci_context
 {
     tci_barrier barrier;
-    volatile void* buffer;
-    volatile unsigned refcount;
+    void* TCI_ATOMIC buffer;
+    TCI_ATOMIC unsigned refcount;
 } tci_context;
 
 int tci_context_init(tci_context** context,

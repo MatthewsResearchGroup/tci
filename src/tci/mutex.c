@@ -187,7 +187,7 @@ int tci_mutex_unlock(tci_mutex* mutex)
 
 int tci_mutex_init(tci_mutex* mutex)
 {
-    *mutex = 0;
+    tci_atomic_clear(mutex, TCI_ATOMIC_RELAXED);
     return 0;
 }
 
@@ -199,13 +199,13 @@ int tci_mutex_destroy(tci_mutex* mutex)
 
 int tci_mutex_lock(tci_mutex* mutex)
 {
-    while (__atomic_test_and_set(mutex, __ATOMIC_ACQUIRE)) tci_yield();
+    while (tci_atomic_test_and_set(mutex, TCI_ATOMIC_ACQUIRE)) tci_yield();
     return 0;
 }
 
 int tci_mutex_trylock(tci_mutex* mutex)
 {
-    if (!__atomic_test_and_set(mutex, __ATOMIC_ACQUIRE))
+    if (!tci_atomic_test_and_set(mutex, TCI_ATOMIC_ACQUIRE))
     {
         return 0;
     }
@@ -217,7 +217,7 @@ int tci_mutex_trylock(tci_mutex* mutex)
 
 int tci_mutex_unlock(tci_mutex* mutex)
 {
-    __atomic_clear((bool*)mutex, __ATOMIC_RELEASE);
+    tci_atomic_clear(mutex, TCI_ATOMIC_RELEASE);
     return 0;
 }
 

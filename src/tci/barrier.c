@@ -57,18 +57,18 @@ int tci_barrier_node_destroy(tci_barrier_node* barrier)
 
 int tci_barrier_node_wait(tci_barrier_node* barrier)
 {
-    const unsigned old_step = __atomic_load_n(&barrier->step, __ATOMIC_RELAXED);
+    const unsigned old_step = tci_atomic_load(&barrier->step, TCI_ATOMIC_RELAXED);
 
-    if (__atomic_add_fetch(&barrier->nwaiting, 1, __ATOMIC_ACQ_REL) ==
+    if (tci_atomic_add_fetch(&barrier->nwaiting, 1, TCI_ATOMIC_ACQ_REL) ==
         barrier->nchildren)
     {
         if (barrier->parent) tci_barrier_node_wait(barrier->parent);
-        __atomic_store_n(&barrier->nwaiting, 0, __ATOMIC_RELAXED);
-        __atomic_fetch_add(&barrier->step, 1, __ATOMIC_RELEASE);
+        tci_atomic_store(&barrier->nwaiting, 0, TCI_ATOMIC_RELAXED);
+        tci_atomic_fetch_add(&barrier->step, 1, TCI_ATOMIC_RELEASE);
     }
     else
     {
-        while (__atomic_load_n(&barrier->step, __ATOMIC_ACQUIRE) == old_step)
+        while (tci_atomic_load(&barrier->step, TCI_ATOMIC_ACQUIRE) == old_step)
             tci_yield();
     }
 

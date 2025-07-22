@@ -20,8 +20,8 @@ typedef struct tci_barrier_node
 {
     struct tci_barrier_node* parent;
     unsigned nchildren;
-    volatile unsigned step;
-    volatile unsigned nwaiting;
+    TCI_ATOMIC unsigned step;
+    TCI_ATOMIC unsigned nwaiting;
 } tci_barrier_node;
 
 typedef struct tci_barrier

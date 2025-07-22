@@ -3,7 +3,6 @@
 
 #include "tci/barrier.hpp"
 #include "tci/communicator.hpp"
-#include "tci/context.hpp"
 #include "tci/mutex.hpp"
 #include "tci/parallel.hpp"
 #include "tci/slot.hpp"

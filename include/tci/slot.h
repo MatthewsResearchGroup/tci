@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-typedef volatile int tci_slot;
+typedef TCI_ATOMIC int tci_slot;
 
 int tci_slot_init(tci_slot* slot, int empty);
 

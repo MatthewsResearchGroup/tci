@@ -9,14 +9,14 @@ int tci_slot_init(tci_slot* slot, int empty)
 
 int tci_slot_is_filled(tci_slot* slot, int empty)
 {
-    return __atomic_load_n(slot, __ATOMIC_ACQUIRE) != empty;
+    return tci_atomic_load(slot, TCI_ATOMIC_ACQUIRE) != empty;
 }
 
 int tci_slot_try_fill(tci_slot* slot, int empty, int value)
 {
-    if (__atomic_compare_exchange_n(slot, &empty, value, 1,
-                                    __ATOMIC_ACQUIRE,
-                                    __ATOMIC_RELAXED)) return 1;
+    if (tci_atomic_compare_exchange(slot, &empty, value, 1,
+                                    TCI_ATOMIC_ACQUIRE,
+                                    TCI_ATOMIC_RELAXED)) return 1;
 
     return empty == value;
 }
@@ -26,14 +26,14 @@ void tci_slot_fill(tci_slot* slot, int empty, int value)
     while (true)
     {
         int expected = empty;
-        if (__atomic_compare_exchange_n(slot, &expected, value, 0,
-                                        __ATOMIC_ACQUIRE,
-                                        __ATOMIC_RELAXED)) break;
+        if (tci_atomic_compare_exchange(slot, &expected, value, 0,
+                                        TCI_ATOMIC_ACQUIRE,
+                                        TCI_ATOMIC_RELAXED)) break;
         tci_yield();
     }
 }
 
 void tci_slot_clear(tci_slot* slot, int empty)
 {
-    __atomic_store_n(slot, empty, __ATOMIC_RELEASE);
+    tci_atomic_store(slot, empty, TCI_ATOMIC_RELEASE);
 }

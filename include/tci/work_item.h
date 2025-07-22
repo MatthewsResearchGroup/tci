@@ -17,7 +17,7 @@ enum
 
 #define TCI_WORK_ITEM_INIT {TCI_NOT_WORKED_ON}
 
-typedef volatile int tci_work_item;
+typedef TCI_ATOMIC int tci_work_item;
 
 int tci_work_item_try_work(tci_work_item* item);
 

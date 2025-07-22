@@ -33,7 +33,7 @@ typedef pthread_mutex_t tci_mutex;
 
 #else
 
-typedef char tci_mutex;
+typedef TCI_ATOMIC_FLAG tci_mutex;
 
 #endif
 

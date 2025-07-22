@@ -22,7 +22,7 @@ typedef struct tci_pipeline
     unsigned depth;
     unsigned last_drained;
     unsigned last_filled;
-    volatile int state[1];
+    TCI_ATOMIC int state[1];
 } tci_pipeline;
 
 void tci_pipeline_init(tci_pipeline** p, unsigned depth, size_t size, void* buffer);
