@@ -164,6 +164,7 @@ check_c_source_compiles("
     }"
     TCI_HAVE_C11_ATOMIC
 )
+unset(CMAKE_REQUIRED_FLAGS)
 
 if(CMAKE_USE_PTHREADS_INIT)
     check_symbol_exists(pthread_mutex_init pthread.h HAVE_PTHREAD_MUTEX_INIT)
