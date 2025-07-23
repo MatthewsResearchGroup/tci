@@ -400,7 +400,14 @@ if(USE_OPENMP_THREADS OR USE_OMP_LOCK)
     list(APPEND PRIVATE_LIBS OpenMP::OpenMP_C)
     list(APPEND PKGCONFIG_LIBS "${OpenMP_C_FLAGS}")
     if(ENABLE_STATIC)
-        set(OPENMP_DEPENDENCY "find_dependency(OpenMP)")
+        set(OPENMP_DEPENDENCY "\
+if(NOT CMAKE_C_COMPILER_LOADED)
+    message(FATAL_ERROR "The C language must be enabled.")
+else()
+    find_dependency(OpenMP)
+endif()\
+"
+)
     endif()
 endif()
 
