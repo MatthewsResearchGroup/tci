@@ -386,9 +386,12 @@ if(HAVE_ATOMIC_LIB)
 endif()
 
 if(USE_PTHREADS_THREADS OR USE_PTHREAD_MUTEX OR USE_PTHREAD_BARRIER OR USE_PTHREAD_SPINLOCK)
-    list(APPEND PUBLIC_LIBS Threads::Threads)
+    list(APPEND PRIVATE_LIBS Threads::Threads)
     # This is probably not always correct
     list(APPEND PKGCONFIG_LIBS -lpthread)
+    if(ENABLE_STATIC)
+        set(THREADS_DEPENDENCY "find_dependency(Threads)")
+    endif()
 endif()
 
 if(USE_OPENMP_THREADS OR USE_OMP_LOCK)
@@ -406,6 +409,9 @@ endif()
 if(USE_TBB_THREADS)
     list(APPEND PRIVATE_LIBS TBB::tbb)
     list(APPEND PKGCONFIG_REQUIRES tbb)
+    if(ENABLE_STATIC)
+        set(TBB_DEPENDENCY "find_dependency(TBB)")
+    endif()
 endif()
 
 if(USE_WINDOWS_THREADS)
@@ -427,6 +433,7 @@ endif()
 
 configure_file(include/tci/tci_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/tci/tci_config.h @ONLY)
 configure_file(tci.pc.in ${CMAKE_CURRENT_BINARY_DIR}/tci.pc @ONLY)
+configure_file(TCIConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/TCIConfig.cmake @ONLY)
 
 set(TCI_SOURCES
     src/tci/barrier.c
@@ -543,7 +550,7 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion
 )
 
-install(FILES "TCIConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/TCIConfigVersion.cmake"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/TCIConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/TCIConfigVersion.cmake"
     DESTINATION ${INSTALL_LIBDIR}/cmake/TCI
 )
 
