@@ -109,32 +109,35 @@ check_c_source_compiles("
     int main()
     {
         // Test all atomic builtin functions
-        __atomic_load_n((int*)0, __ATOMIC_SEQ_CST);
-        __atomic_load((int*)0, (int*)0, __ATOMIC_SEQ_CST);
-        __atomic_store_n((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_store((int*)0, (int*)0, __ATOMIC_SEQ_CST);
-        __atomic_exchange_n((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_exchange((int*)0, (int*)0, (int*)0, __ATOMIC_SEQ_CST);
-        __atomic_compare_exchange_n((int*)0, (int*)0, 0, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-        __atomic_compare_exchange((int*)0, (int*)0, (int*)0, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-        __atomic_add_fetch((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_sub_fetch((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_and_fetch((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_xor_fetch((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_or_fetch((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_nand_fetch((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_fetch_add((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_fetch_sub((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_fetch_and((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_fetch_xor((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_fetch_or((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_fetch_nand((int*)0, 1, __ATOMIC_SEQ_CST);
-        __atomic_test_and_set((char*)0, __ATOMIC_SEQ_CST);
-        __atomic_clear((_Bool*)0, __ATOMIC_SEQ_CST);
+        volatile int x;
+        int y, z;
+        volatile char f;
+        __atomic_load_n(&x, __ATOMIC_SEQ_CST);
+        __atomic_load(&x, &y, __ATOMIC_SEQ_CST);
+        __atomic_store_n(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_store(&x, &y, __ATOMIC_SEQ_CST);
+        __atomic_exchange_n(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_exchange(&x, &y, &z, __ATOMIC_SEQ_CST);
+        __atomic_compare_exchange_n(&x, &y, 0, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+        __atomic_compare_exchange(&x, &y, &z, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+        __atomic_add_fetch(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_sub_fetch(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_and_fetch(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_xor_fetch(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_or_fetch(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_nand_fetch(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_fetch_add(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_fetch_sub(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_fetch_and(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_fetch_xor(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_fetch_or(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_fetch_nand(&x, 1, __ATOMIC_SEQ_CST);
+        __atomic_test_and_set(&f, __ATOMIC_SEQ_CST);
+        __atomic_clear(&f, __ATOMIC_SEQ_CST);
         __atomic_thread_fence(__ATOMIC_SEQ_CST);
         __atomic_signal_fence(__ATOMIC_SEQ_CST);
-        __atomic_always_lock_free(4, 0);
-        __atomic_is_lock_free(4, 0);
+        __atomic_always_lock_free(sizeof(x), &x);
+        __atomic_is_lock_free(sizeof(x), &x);
         return 0;
     }"
     TCI_HAVE_GCC_ATOMIC_BUILTINS
@@ -145,21 +148,23 @@ check_c_source_compiles("
     int main()
     {
         // Test C11 atomic functions
-        atomic_load_explicit((_Atomic int*)0, memory_order_seq_cst);
-        atomic_store_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
-        atomic_exchange_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
-        atomic_compare_exchange_strong_explicit((_Atomic int*)0, (int*)0, 0, memory_order_seq_cst, memory_order_seq_cst);
-        atomic_compare_exchange_weak_explicit((_Atomic int*)0, (int*)0, 0, memory_order_seq_cst, memory_order_seq_cst);
-        atomic_fetch_add_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
-        atomic_fetch_sub_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
-        atomic_fetch_and_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
-        atomic_fetch_or_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
-        atomic_fetch_xor_explicit((_Atomic int*)0, 1, memory_order_seq_cst);
+        _Atomic int x;
+        int y;
+        atomic_load_explicit(&x, memory_order_seq_cst);
+        atomic_store_explicit(&x, 1, memory_order_seq_cst);
+        atomic_exchange_explicit(&x, 1, memory_order_seq_cst);
+        atomic_compare_exchange_strong_explicit(&x, &y, 0, memory_order_seq_cst, memory_order_seq_cst);
+        atomic_compare_exchange_weak_explicit(&x, &y, 0, memory_order_seq_cst, memory_order_seq_cst);
+        atomic_fetch_add_explicit(&x, 1, memory_order_seq_cst);
+        atomic_fetch_sub_explicit(&x, 1, memory_order_seq_cst);
+        atomic_fetch_and_explicit(&x, 1, memory_order_seq_cst);
+        atomic_fetch_or_explicit(&x, 1, memory_order_seq_cst);
+        atomic_fetch_xor_explicit(&x, 1, memory_order_seq_cst);
         atomic_flag_test_and_set_explicit((atomic_flag*)0, memory_order_seq_cst);
         atomic_flag_clear_explicit((atomic_flag*)0, memory_order_seq_cst);
         atomic_thread_fence(memory_order_seq_cst);
         atomic_signal_fence(memory_order_seq_cst);
-        atomic_is_lock_free((_Atomic int*)0);
+        atomic_is_lock_free(&x);
         return 0;
     }"
     TCI_HAVE_C11_ATOMIC
