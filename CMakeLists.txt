@@ -399,21 +399,13 @@ if(USE_PTHREADS_THREADS OR USE_PTHREAD_MUTEX OR USE_PTHREAD_BARRIER OR USE_PTHRE
     endif()
 endif()
 
+set(TCI_OPENMP_ENABLED 0)
 if(USE_OPENMP_THREADS OR USE_OMP_LOCK)
     add_compile_options("${OpenMP_C_FLAGS}")
     add_link_options("${OpenMP_C_FLAGS}")
     list(APPEND PRIVATE_LIBS OpenMP::OpenMP_C)
     list(APPEND PKGCONFIG_LIBS "${OpenMP_C_FLAGS}")
-    if(ENABLE_STATIC)
-        set(OPENMP_DEPENDENCY " \
-if(NOT CMAKE_C_COMPILER_LOADED) \
-    message(FATAL_ERROR \"The C language must be enabled.\") \
-else() \
-    find_dependency(OpenMP) \
-endif() \
-"
-)
-    endif()
+    set(TCI_OPENMP_ENABLED 1)
 endif()
 
 if(USE_DISPATCH_THREADS AND HAVE_DISPATCH_LIB)
