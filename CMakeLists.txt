@@ -491,6 +491,7 @@ endif()
 
 add_library(tci-objects OBJECT ${TCI_SOURCES})
 set_property(TARGET tci-objects PROPERTY POSITION_INDEPENDENT_CODE 1)
+target_compile_options(tci-objects PRIVATE $<$<CONFIG:Debug>:-O0>)
 
 target_include_directories(tci-objects PRIVATE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
