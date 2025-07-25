@@ -434,6 +434,9 @@ if(USE_PPL_THREADS OR USE_TBB_THREADS)
     set(TCI_CXX ON)
 endif()
 
+string(REPLACE ";" " " PKGCONFIG_LIBS "${PKGCONFIG_LIBS}")
+string(REPLACE ";" " " PKGCONFIG_REQUIRES "${PKGCONFIG_REQUIRES}")
+
 #
 # Configure TCI
 #
