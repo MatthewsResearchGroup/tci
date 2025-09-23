@@ -24,6 +24,8 @@ typedef struct tci_barrier_node
     TCI_ATOMIC unsigned nwaiting;
 } tci_barrier_node;
 
+#endif
+
 typedef struct tci_barrier
 {
     union
@@ -35,7 +37,6 @@ typedef struct tci_barrier
     unsigned group_size;
     int is_tree;
 } tci_barrier;
-#endif
 
 #ifdef __cplusplus
 extern "C" {
