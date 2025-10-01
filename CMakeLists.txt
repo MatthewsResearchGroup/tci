@@ -513,6 +513,7 @@ endif()
 
 if (ENABLE_SHARED)
     add_library(tci SHARED $<TARGET_OBJECTS:tci-objects>)
+    add_library(TCI::tci ALIAS tci)
     target_link_libraries(tci PUBLIC ${PUBLIC_LIBS} PRIVATE ${PRIVATE_LIBS})
     set_target_properties(tci PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
     list(APPEND TCI_TARGETS tci)
@@ -526,6 +527,7 @@ endif()
 
 if (ENABLE_STATIC)
     add_library(tci-static STATIC $<TARGET_OBJECTS:tci-objects>)
+    add_library(TCI::tci-static ALIAS tci-static)
     target_link_libraries(tci-static PUBLIC ${PUBLIC_LIBS} PRIVATE ${PRIVATE_LIBS})
     set_target_properties(tci-static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
     set_target_properties(tci-static PROPERTIES OUTPUT_NAME tci)
@@ -567,3 +569,9 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/TCIConfig.cmake" "${CMAKE_CURRENT_BIN
 )
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tci.pc" DESTINATION ${INSTALL_LIBDIR}/pkgconfig)
+
+export(EXPORT tci-targets
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/TCITargets.cmake
+    NAMESPACE TCI::
+)
+
